@@ -6,12 +6,13 @@
                 ref="pond"
                 label-idle="Click to choose image or drag here..."
                 @init="filepondInitialized"
-                accepted-file-types="image/*"
+                accepted-file-types="image/jpg, image/jpeg, image/png"
                 @processfile="handleProcessedFile"
+                max-file-size="1MB"
             /> 
         </div>
         <div class="mt-8 mb-24">
-            <h3 class="text-2xl font-medium text-center">Image Gallery</h3>
+            <h3 class="text-2xl font-medium  text-center">Image Gallery</h3>
             <div class="grid grid-cols-3 gap-2 justify-evenly mt-4">
                 <div v-for="(image, index) in images" :key="index">
                     <img :src="'/storage/images/' + image">
@@ -24,20 +25,28 @@
 import vueFilePond, { setOptions } from 'vue-filepond';
 import "filepond/dist/filepond.min.css";
 import FilePondPluginFileValidationType from 'filepond-plugin-file-validate-type';
+import FilePondPluginFileValidationSize from 'filepond-plugin-file-validate-size';
+
+let serverMessage = {};
 
 setOptions({
     server: {
         process: {
             url: './upload',
+            onerror: (response) =>{
+                serverMessage = JSON.parse(response);
+            },
             headers: {
                 'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf_token"]').content
             }
         }
+    },
+    labelFileProcessingError: () => {
+        return serverMessage.error;
     }
+});
 
-})
-
-const FilePond = vueFilePond(FilePondPluginFileValidationType);
+const FilePond = vueFilePond(FilePondPluginFileValidationType, FilePondPluginFileValidationSize);
 
 export default {
     components: {
