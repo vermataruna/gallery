@@ -43,7 +43,7 @@ class ImageController extends Controller
             'size' => $uploadedFile->getSize(),
         ]);
 
-        return $image;
+        return $image->name;
 
     }
 }
